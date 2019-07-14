@@ -1,3 +1,0 @@
-<tool name="codechecker" version="0.1-pafccj2">
-  <runtime name="PATH" value="/home/cmssw/slc7_amd64_gcc700/external/codechecker/0.1-pafccj2/bin" type="path"/>
-</tool>
