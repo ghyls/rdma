@@ -1,8 +1,0 @@
-<project name="CMSSW" version="CMSSW_10_6_0_Patatrack">
-  <config dir="config"/>
-  <toolbox dir="file:/home/cmssw/slc7_amd64_gcc700/cms/cmssw-tool-conf/45.0-pafccj6"/>
-  <base url="file:/home/cmssw/BUILD/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_6_0_Patatrack/">
-    <download url="file:config" name="config"/>
-    <download url="file:src"    name="src"/>
-  </base>
-</project>

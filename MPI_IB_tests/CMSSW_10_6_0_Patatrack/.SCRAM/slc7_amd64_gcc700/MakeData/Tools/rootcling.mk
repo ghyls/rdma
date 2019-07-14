@@ -1,5 +1,0 @@
-ALL_TOOLS      += rootcling
-rootcling_EX_INCLUDE := /home/cmssw/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj/include
-rootcling_EX_LIB := Core
-rootcling_EX_USE := root_interface sockets pcre zlib xz
-
