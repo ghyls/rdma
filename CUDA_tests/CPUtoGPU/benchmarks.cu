@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
     doHostToDevice << std::endl;}
 
-    // options:
+    // options: 
         // HtoD onestep
         // HtoH onestep
         // HtoD no onestep
