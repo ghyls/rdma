@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
         doHostToHost = atoi(argv[2]);
         doHostToDevice = atoi(argv[3]);
     }
-    if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
-    doHostToDevice << std::endl;}
+    //if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
+    //doHostToDevice << std::endl;}
 
     // options: 
         // HtoD onestep
