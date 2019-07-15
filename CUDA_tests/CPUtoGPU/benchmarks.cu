@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
         doHostToHost = atoi(argv[2]);
         doHostToDevice = atoi(argv[3]);
     }
-    if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
-    doHostToDevice << std::endl;}
+    //if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
+    //doHostToDevice << std::endl;}
 
     // options: 
         // HtoD onestep
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     if (rank == 0){std::cout << "# size (MB)\t" << "time" << std::endl;}
 
-    for (int nInts = 2; nInts < 5e6; nInts *= 2)
+    for (int nInts = 2; nInts < 3e6; nInts *= 2)
     {
         size = nInts*sizeof(int);
         //if (rank == 0) {std::cout << "hi there!" << std::endl;}
