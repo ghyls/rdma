@@ -55,28 +55,65 @@ void CUDAErrorCheck()
 
 int main()
 {
+    
+    float t0, t1, t2;
     bool oneStep = false;
     int rank;
+    printf("\n");
     
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+
+    MPI_Get_processor_name(processor_name, &name_len);
+
+    if (rank == 0){printf("#0 is %s", processor_name);}
+    if (rank == 1){printf("#1 is %s", processor_name);}
+
+    printf("\n");
+    MPI_Barrier(MPI_COMM_WORLD);
+
     // total number of threads
     long unsigned int n = NUM_BLOCKS * THREADS_PER_BLOCK;
     int *count_d, *count_h;
-
-    if (rank == 0){std::cout << "#0: hello! How are you?" << std::endl;}
-
+    
+    
     // allocate memory, somewhere
+    t0 = MPI_Wtime();
     cudaMalloc(&count_d, n * sizeof(int));
+    t1 = MPI_Wtime();
     cudaMallocHost((void **) &count_h, n * sizeof(int));
+    t2 = MPI_Wtime();
     CUDAErrorCheck();
 
 
+    if (rank == 0){
+        std::cout << "#0: hello! I'll do the CPU part of the job" << std::endl;}
+    if (rank == 1){
+        std::cout << "#1: hi! Leave the GPU stuff for me" << std::endl;}
+
+    if (rank == 0){
+        std::cout << "#0: allocating memory on the GPU took me " << t1-t0
+        << " s, but i will not use it at all" << std::endl;
+        std::cout << "#0: For the CPU, I spent " << t2-t1 << " s" << std::endl;
+    }
+    if (rank == 1){
+        std::cout << "#1: allocating memory on the GPU took me " << t1-t0
+        << " s" << std::endl;
+        std::cout << "#1: For the CPU buffer, I spent " << t2-t1 << 
+        " s, but I will not use it!" << std::endl;
+    }
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
     if (rank == 1) // run the kernel and send back the results.
     {
         std::cout << "#1: Fine, I'm about to launch the kernel" << std::endl;
         
+        float t0 = MPI_Wtime();
         kernel<<<NUM_BLOCKS, THREADS_PER_BLOCK>>>(count_d);
         std::cout << "#1: Launched!" << std::endl;
         
@@ -93,15 +130,21 @@ int main()
             cudaMemcpy(count_h, count_d, n * sizeof(int), cudaMemcpyDeviceToHost);
             MPI_Ssend(count_h, n, MPI_INT, 0, 0, MPI_COMM_WORLD);
         }
+        float t1 = MPI_Wtime();
+
+        std::cout << "#1: Sent! running + sending took me only " << t1-t0 << 
+        " seconds!" << std::endl;
     }
     else if (rank==0)
     {
-
         // do CPU stuff until rank 1 finishes with the kernel
-        std::cout << "#0: I'm waiting for you bro!" << std::endl;
-
+        std::cout << "#0: Now I'm waiting for your results!" << std::endl;
+        float t0 = MPI_Wtime();
         MPI_Recv(count_h, n, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        std::cout << "#0: Received! Nice catch!" << std::endl;
+        float t1 = MPI_Wtime();
+        std::cout << "#0: Received! I've got it!" << std::endl;
+        std::cout << "#0: I've been waiting (doing anything) for " << t1-t0 << 
+        " seconds. Now I will compute the final result." << std::endl;
     
         long unsigned int reduced_count = 0; // number of stones inside the circle
         for(int i = 0; i < n; i++)
@@ -112,6 +155,7 @@ int main()
         // find the ratio
         long unsigned int total_iter = n * ITER_PER_THREAD;
         double pi = ((double)reduced_count / total_iter) * 4.0; // 4 pi r^2
+        std::cout << "\n---------------------------------" << std::endl;
         printf("#0: PI [%lu iterations] = %.10g\n", total_iter, pi);
         printf("#0: Error = %.10g\n", pi - PI);
     }

@@ -1,48 +1,47 @@
 
 
-
 # include <iostream>
 # include <cuda.h>
 # include "mpi.h"
 
 
-// Works without CUDA support for MPI. MPI cannot send buffers
-// from GPU to GPU, at least without CUDA support.
-
 int main()
 {
-
     int rank;
-    //int size;
-
+    
     MPI_Init(NULL, NULL);
-    //MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
 
-    int numDevs = 0;
-    cudaGetDeviceCount(&numDevs);
+    int N = 4.2e4; 
+    int p_size = N*sizeof(float);
 
-    std::cout << numDevs << std::endl;
-
-
-
-    float *buf_host = (float*)malloc(1e6*sizeof(float));
-    //int size = 1e6*sizeof(float);
+    float *buf_host = (float*)malloc(p_size);
     float *buf_dev;// = (float*)malloc(1e6*sizeof(float));
-    cudaMalloc(&buf_dev, 1e6*sizeof(float));
+    cudaMalloc(&buf_dev, p_size);
 
-    if( 0 == rank ) {
+    int nIter = 200;
 
-        //cudaMemcpy(buf_host, buf_dev, size, cudaMemcpyDeviceToHost);
-        MPI_Send(buf_dev, 1e6, MPI_FLOAT, 1, 0, MPI_COMM_WORLD);
-	std::cout << "sent!" << std::endl;
+    float t0 = MPI_Wtime();
+    for (int i = 0; i < nIter; i++)
+    {
+        if(rank == 0) {
+            MPI_Ssend(buf_host, N, MPI_FLOAT, 1, 0, MPI_COMM_WORLD);
+        }
+        else { // assume MPI rank 1
+            MPI_Recv(buf_dev, N, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
     }
-    else { // assume MPI rank 1
-        
-        std::cout << "receiving..." << std::endl;
-        MPI_Recv(buf_dev, 1e6, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        std::cout << "received!" << std::endl;
-        //cudaMemcpy(buf_dev, buf_host, size, cudaMemcpyHostToDevice);
+    float t1 = MPI_Wtime();
+
+    if (rank == 0)
+    {
+        float t_send = (t1-t0)/nIter;
+        std::cout << N*sizeof(float) / 1048576. << " \t" << t_send << std::endl;
     }
 
+    MPI_Finalize();
+    //cudaFree(buf_dev);
+    //free(buf_host);
 }
+
