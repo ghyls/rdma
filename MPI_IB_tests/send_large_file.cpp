@@ -93,7 +93,8 @@ int main(int argc, char* argv[])
                     t_SendAB += t_1 - t_0;
                     }
             }
-        
+            
+            
             //if (rank == 0) std::cout << t_AtoB << std::endl;
         }
         MPI_Barrier(MPI_COMM_WORLD);
