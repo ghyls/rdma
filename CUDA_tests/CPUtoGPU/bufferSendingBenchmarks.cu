@@ -62,15 +62,6 @@ int main(int argc, char *argv[])
         std::cout << "# Only Memcpy: " << doOnlyMemcpy << std::endl; 
     }
 
-    //if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
-    //doHostToDevice << std::endl;}
-
-    // options: 
-        // HtoD onestep
-        // HtoH onestep
-        // HtoD no onestep
-        // HtoH no onestep
-
 
     //int numDevs = 0;
     //cudaGetDeviceCount(&numDevs);
@@ -83,12 +74,13 @@ int main(int argc, char *argv[])
     if (rank == 0){std::cout << "# p_size (MB)\t" << "time" << std::endl;}
 
     float t_0, t_1;
-    int nReps = 100;
+    //int nReps = 100;
+    int nReps = 20;
 
 
     int M;
     //for (int N = 10; N < 1e6; N *= 2)
-    for (int N = 4.2e4; N < 1e6; N *= 1.1)
+    for (int N = 4.2e4; N < 2e6; N *= 1.1)
     {
         M = N;
         MPI_Barrier(MPI_COMM_WORLD);
@@ -97,7 +89,7 @@ int main(int argc, char *argv[])
         int *buf_host = (int*)malloc(N*sizeof(int));   // host buffer
         int *buf_dev;
         cudaMalloc(&buf_dev, N*sizeof(int));       // dev buffer
-
+        
         if (doOnlyMemcpy)
         {
             t_0 = MPI_Wtime();
@@ -109,7 +101,6 @@ int main(int argc, char *argv[])
                 }
             }
             t_1 = MPI_Wtime();
-
         }
         else if (doHostToHost)
         {
