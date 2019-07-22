@@ -36,16 +36,22 @@ int main(int argc, char *argv[])
     //MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    bool doOneStep = 1;
-    bool doHostToHost = 0;
-    bool doHostToDevice = 1;
+//    bool doOneStep = 1;
+//    bool doHostToHost = 0;
+//    bool doHostToDevice = 1;
 
-    if (argc != 4){std::cout << "c'mon"; return -1;}
+    bool doOneStep;
+    bool doHostToHost;
+    bool doHostToDevice;
+    bool doOnlyMemcpy;
+
+    if (argc != 5){std::cout << "c'mon"; return -1;}
     else if (argc > 0)
     {
         doOneStep = atoi(argv[1]);
         doHostToHost = atoi(argv[2]);
         doHostToDevice = atoi(argv[3]);
+        doOnlyMemcpy = atoi(argv[4]);
     }
 
     if (rank == 0)
@@ -53,6 +59,7 @@ int main(int argc, char *argv[])
         std::cout << "# One Step: " << doOneStep << std::endl; 
         std::cout << "# H to H: " << doHostToHost << std::endl; 
         std::cout << "# H to dev: " << doHostToDevice << std::endl; 
+        std::cout << "# Only Memcpy: " << doOnlyMemcpy << std::endl; 
     }
 
     //if (rank == 0){std::cout << doOneStep << " " << doHostToHost << " " <<
@@ -79,19 +86,32 @@ int main(int argc, char *argv[])
     int nReps = 100;
 
 
-
-    //for (int nInts = 4.2e4; nInts < 1e6; nInts *= 1.1)
-    for (int nInts = 5e5; nInts < 1e7; nInts *= 1.2)
+    int M;
+    //for (int N = 10; N < 1e6; N *= 2)
+    for (int N = 4.2e4; N < 1e6; N *= 1.1)
     {
-        //MPI_Barrier(MPI_COMM_WORLD);
-        p_size = nInts*sizeof(int);
+        M = N;
+        MPI_Barrier(MPI_COMM_WORLD);
+        p_size = N*sizeof(int);
 
-        int *buf_host = (int*)malloc(nInts*sizeof(int));   // host buffer
+        int *buf_host = (int*)malloc(N*sizeof(int));   // host buffer
         int *buf_dev;
-        cudaMalloc(&buf_dev, nInts*sizeof(int));       // dev buffer
+        cudaMalloc(&buf_dev, N*sizeof(int));       // dev buffer
 
+        if (doOnlyMemcpy)
+        {
+            t_0 = MPI_Wtime();
+            for (int i = 0; i < nReps; i++)
+            {
+                if (rank==1)
+                {
+                    cudaMemcpy(buf_dev, buf_host, p_size, cudaMemcpyHostToDevice);
+                }
+            }
+            t_1 = MPI_Wtime();
 
-        if (doHostToHost)
+        }
+        else if (doHostToHost)
         {
             // std::cout << "HERE BE DRAGONS" << std::endl; 
         
@@ -99,10 +119,10 @@ int main(int argc, char *argv[])
             for (int i = 0; i < nReps; i++)
             {
                 if(rank == 0) {
-                    MPI_Ssend(buf_host, nInts, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                    MPI_Send(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
                 }
                 else { // assume MPI rank 1
-                    MPI_Recv(buf_host, nInts, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Recv(buf_host, M, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 }
             }
             t_1 = MPI_Wtime();
@@ -114,51 +134,35 @@ int main(int argc, char *argv[])
             
             for (int i = 0; i < nReps; i++)
             {
-                MPI_Barrier(MPI_COMM_WORLD);
-                //cudaMemcpy(buf_dev, buf_host, p_size, cudaMemcpyHostToDevice); // not here
-                
-                //std::cout << i << " out of " << nReps << std::endl;
+
                 if(rank == 0) {
-                    MPI_Ssend(buf_host, nInts, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                    MPI_Ssend(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
                     //std::cout << "sent!" << std::endl;                
                 }
                 else if (rank==1) { // assume MPI rank 1
                     if (doOneStep){
                         //std::cout << "recving.." << std::endl;
-                        MPI_Recv(buf_dev, nInts, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                        MPI_Recv(buf_dev, M, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                         
                         //std::cout << "ahgggfggffffghhhhh" << std::endl; 
                     }
                     else{
                         //std::cout << "HERE BE DRAGONS" << std::endl; 
-                        MPI_Recv(buf_host, nInts, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                        MPI_Recv(buf_host, M, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                         cudaMemcpy(buf_dev, buf_host, p_size, cudaMemcpyHostToDevice);
                     }
                     //std::cout << "received!" << std::endl;
                 }
-                //std::cout << rank << ": last" << std::endl;
-
             }
-            //std::cout << rank << ": measuring t1" << std::endl;
-
             t_1 = MPI_Wtime();
         }
-        //std::cout << rank << ": entering the barrier" << std::endl;
-
-        //MPI_Barrier(MPI_COMM_WORLD);
 
         if (rank == 0)
         {
             float t_send = (t_1-t_0)/nReps;
-            std::cout << p_size / 1048576. << " \t" << t_send << std::endl;
-            //std::cout << p_size << " \t" << t_send << std::endl;
+            std::cout << M*sizeof(int) / 1048576. << " \t" << t_send << std::endl;
+            //std::cout << N << " \t" << M << std::endl;
         }
-        //cudaFree(buf_dev);
-        //free(buf_host);
-        //delete buf_dev;
-        //delete buf_host;
-        //cudaDeviceSynchronize();
-        MPI_Barrier(MPI_COMM_WORLD);
     }
-    //MPI_Finalize();
+    MPI_Finalize();
 }
