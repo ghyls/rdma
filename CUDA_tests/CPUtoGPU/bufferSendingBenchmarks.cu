@@ -74,14 +74,14 @@ int main(int argc, char *argv[])
     if (rank == 0){std::cout << "# p_size (MB)\t" << "time" << std::endl;}
 
     float t_0, t_1;
-    //int nReps = 100;
-    int nReps = 20;
+    int nReps = 100;
 
 
     int M;
-    //for (int N = 10; N < 1e6; N *= 2)
-    for (int N = 4.2e4; N < 2e6; N *= 1.1)
+    //for (int N = 4.2e4; N < 2e6; N *= 1.1)
+    for (int N = 1e6; N < 1e8; N *= 2)
     {
+        N = 1e7;
         M = N;
         MPI_Barrier(MPI_COMM_WORLD);
         p_size = N*sizeof(int);
@@ -154,6 +154,7 @@ int main(int argc, char *argv[])
             std::cout << M*sizeof(int) / 1048576. << " \t" << t_send << std::endl;
             //std::cout << N << " \t" << M << std::endl;
         }
+        //cudaFree(buf_dev);
     }
     MPI_Finalize();
 }

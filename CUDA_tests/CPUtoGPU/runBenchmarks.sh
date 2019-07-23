@@ -1,5 +1,5 @@
 
-nvcc -I/home/mariog/openmpi-4.0.1/build/include -L/home/mariog/openmpi-4.0.1/build/lib -lmpi bufferSendingBenchmarks.cu -o main
+#nvcc -I/home/mariog/openmpi-4.0.1/build/include -L/home/mariog/openmpi-4.0.1/build/lib -lmpi bufferSendingBenchmarks.cu -o main
 scp -r *  mariog@felk40.cern.ch:/home/mariog/CUDA_tests/CPUtoGPU
 
 
