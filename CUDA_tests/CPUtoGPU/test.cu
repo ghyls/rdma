@@ -4,6 +4,8 @@
 # include <cuda.h>
 # include "mpi.h"
 
+#define N 10000
+#define M 10000
 
 int main()
 {
@@ -13,15 +15,18 @@ int main()
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
 
-    const int N = 4.3e4; 
-    const int M = N; 
+    //const int N = 10000; 
+    //const int M = N; 
     const int p_size = N*sizeof(float);
 
-    float *buf_host, *buf_dev;
+    float *buf_host;
+    float *buf_dev;
 
+    //cudaMallocHost((void **) &buf_host, p_size);
     //float *buf_host = (float*)malloc(p_size);
-    cudaMallocHost((void **) &buf_host, p_size);
-    //float *buf_host = new float[M];
+    buf_host = new float[N];
+    //float buf_host[N];
+
 
     if (rank==0){
         for (int i = 0; i < N; i++){
