@@ -15,8 +15,6 @@
 #define THREADS_PER_BLOCK 256
 #define ITER_PER_THREAD 2048
 
-#define PI 3.14159265359
-
 
 __global__ void kernel(int *count)
 {
@@ -24,7 +22,6 @@ __global__ void kernel(int *count)
 
     double x, y, z;
 
-    // find the overall ID of the thread
     int index = blockDim.x * blockIdx.x + threadIdx.x;
 
     count[index] = 0;
@@ -37,7 +34,7 @@ __global__ void kernel(int *count)
         z =  x * x + y * y;
  
         // if the stone falls in the circle contained in the square defined by x
-        // and y, put 1. Else put 0.
+        // and y, write 1. Else write 0.
         if (z <= 1)
             count[index] += 1;
     }
@@ -57,7 +54,7 @@ int main()
 {
     
     float t0, t1, t2;
-    bool oneStep = false;
+    bool oneStep = true;
     int rank;
     printf("\n");
     
@@ -142,7 +139,7 @@ int main()
         float t0 = MPI_Wtime();
         MPI_Recv(count_h, n, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         float t1 = MPI_Wtime();
-        std::cout << "#0: Received! I've got it!" << std::endl;
+        std::cout << "#0: Received! I've got them!" << std::endl;
         std::cout << "#0: I've been waiting (doing anything) for " << t1-t0 << 
         " seconds. Now I will compute the final result." << std::endl;
     
@@ -156,10 +153,10 @@ int main()
         long unsigned int total_iter = n * ITER_PER_THREAD;
         double pi = ((double)reduced_count / total_iter) * 4.0; // 4 pi r^2
         std::cout << "\n---------------------------------" << std::endl;
-        printf("#0: PI [%lu iterations] = %.10g\n", total_iter, pi);
-        printf("#0: Error = %.10g\n", pi - PI);
+        printf("#0: pi = %.10g\n", pi);
+         
     }
-        
+    
     cudaFree(count_h);    
     cudaFree(count_d);    
 }
