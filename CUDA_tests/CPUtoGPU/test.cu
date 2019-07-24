@@ -4,8 +4,23 @@
 # include <cuda.h>
 # include "mpi.h"
 
-#define N 10000
-#define M 10000
+// number of elements of the host buffer. All of them are sent to the device. 
+#define N 1e4 
+// number of elements that will be received on the dev buffer. M must be <= N.
+#define M 1e4
+
+// When N = M ~ 1e5             -> Everything works.
+// When N = M < 4.2e4           -> Segmentation fault (non UCX related)
+// When N = M > ~1e8            -> UCX ERROR: Segmentation fault.
+// When N < 4.2e4 and M << N    -> works fine. 
+
+
+/* After printing some memory addresses, I have noticed that the segmentation
+faults occur because MPI is still trying to write in the device after the buffer
+is over. Since the floats weight 4 bytes both in Patatrack and in Felk, it could
+be most likely because MPI doesn't start writing the buffer right at the
+beginning. I am still trying to prove this.*/
+
 
 int main()
 {
@@ -14,69 +29,31 @@ int main()
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-
-    //const int N = 10000; 
-    //const int M = N; 
-    const int p_size = N*sizeof(float);
-
     float *buf_host;
     float *buf_dev;
 
-    //cudaMallocHost((void **) &buf_host, p_size);
-    //float *buf_host = (float*)malloc(p_size);
-    buf_host = new float[N];
+    // the size of both buffers (not necessarily the size of the package)
+    const int bufferSize = N*sizeof(float);
+
+    // Host buffer: The four following alternatives give the same result. I am
+    // pretty sure that the error has nothing to do with the host.
+    // -----
+    cudaMallocHost((void **) &buf_host, bufferSize);
+    //float *buf_host = (float*)malloc(bufferSize);
+    //buf_host = new float[N];
     //float buf_host[N];
+    // -----
 
+    // Device buffer
+    cudaMalloc((void **) &buf_dev, bufferSize);
 
-    if (rank==0){
-        for (int i = 0; i < N; i++){
-            buf_host[i] = 4;
-        }
-    }
-    else if (rank==1){
-        for (int i = 0; i < N; i++){
-            buf_host[i] = -1;
-        }
-    }
-
-    cudaMalloc((void **) &buf_dev, p_size);
-
-    const int nIter = 200;
-    float t0 = MPI_Wtime();
-    //for (int i = 0; i < nIter; i++)
-    //{
     if(rank == 0) {
         MPI_Ssend(buf_host, N, MPI_FLOAT, 1, 0, MPI_COMM_WORLD);
-        std::cout << "HELLO, " << buf_host <<  std::endl;
     }
-    else { // assume MPI rank 1
-
-        //MPI_Recv(buf_host, M, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        //cudaMemcpy(buf_dev, buf_host, p_size, cudaMemcpyHostToDevice);
-
+    else{ 
+        // receive into the device buffer
         MPI_Recv(buf_dev, M, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        std::cout << "HELLO2, " << buf_host << std::endl;
-
-        //cudaMemcpy(buf_host, buf_dev, p_size, cudaMemcpyDeviceToHost);
-        
-        for (int i = 0; i < M; i++)
-        {
-            if (buf_host[i] != -1)
-                std::cout << buf_host[i] << std::endl;
-        }
-
     }
-    //}
-    float t1 = MPI_Wtime();
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == 0)
-    {
-        float t_send = (t1-t0)/nIter;
-        std::cout << N*sizeof(float) / 1048576. << " \t" << t_send << std::endl;
-    }
-
     MPI_Finalize();
-    //cudaFree(buf_dev);
-    //free(buf_host);
 }
 
