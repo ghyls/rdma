@@ -1,11 +1,9 @@
-// hi
+
 
 # include <cuda.h>
 # include <stdio.h>
 # include <iostream>
 # include "mpi.h"
-
-
 
 
 #define NUM_BLOCKS 1024
@@ -24,18 +22,17 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 
 
-
-__global__ void kernel(int* buf_d, int len)
+__global__ void kernel(volatile int* buf_d, int len)
 {
-    // should I run this loop on every thread?
+    //printf("#k: why I am not being printed...\n");
+
     while (true)
-    {     
-        printf("%2d\t", buf_d[len]);
+    {
+        //recv[0] = 178;
         if (buf_d[len] == TRIGER_TAG)
         {
-            printf("now the actual kernel code starts running\n");
-            printf("%2d\n", buf_d[len]);
-            break;
+            //asm("trap;");
+            return;
         }
 
         for (int i = 0; i < 1e3; i++)
@@ -47,7 +44,6 @@ __global__ void kernel(int* buf_d, int len)
     // --------
     // Now you are supposed to do something useful
 }
-
 
 
 int main()
@@ -66,15 +62,14 @@ int main()
     printf("#%d is %s\n", rank, processor_name);
     
 
-
     int n = 1e6; // number of elements of the buffer
     
     if (rank == 0)
     {
         // prepare the buffer on the client. The trigger will be the last
-        // element of the buffer.
+        // element of the buffer. buf_h has *n* elements.
         int *buf_h;
-        cudaMallocHost((void **) &buf_h, n * sizeof(int) + sizeof(int));
+        cudaMallocHost((void **) &buf_h, (n+1) * sizeof(int));
         
         // init the buffer
         for (int i = 0; i < n; i++){
@@ -85,8 +80,9 @@ int main()
         buf_h[n] = TRIGER_TAG;
 
         // send the buffer
-        printf("sending the data\n");        
+        printf("#0: sending the data\n");        
         MPI_Ssend(buf_h, n+1, MPI_INT,1, 0, MPI_COMM_WORLD);
+        printf("#0: sent\n");        
     }
 
     if (rank == 1)
@@ -96,12 +92,12 @@ int main()
         cudaMalloc((void **) &buf_d, (n+1) * sizeof(int));
 
         // launch the kernel
-        kernel<<<1, 1>>>(buf_d, n);
-        printf("just launched the kernel\n");
+        kernel<<<NUM_BLOCKS, THREADS_PER_BLOCK>>>(buf_d, n);
+        printf("#1: just launched the kernel\n");
 
         // receive the package
-        printf("receiving\n");
         MPI_Recv(buf_d, n+1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("#1: received\n");
 
         // make sure that the CPU waits for the GPU to finish.
         gpuErrchk( cudaDeviceSynchronize() ); 
@@ -112,36 +108,25 @@ int main()
 
 
 
+
+/*
+
 Dear Felice,
 
-    I think that I have just somehow archieved the goal you suggested me
-    yesterday. Now, the core that receives the buffer, runs the kernel at the
-    beggining, and the kernel keeps running a while(true) loop, until the whole
-    buffer has been received.
+    I have just "solved" (I would not say solved) the issue. As far as I
+    uncerstood, it looks like the compiler was assuming that the variable that
+    serves as trigger once the package is recieved was always constant, so
+    passing it as "volatile" did the job. This makes sense for me, since the
+    variable is not being explicetely modified (MPI just writes into its
+    address.)
 
-    I don't know if it's worth, because now the core has to wait until it has
-    called the kernel to start receiving the package (I don't know if it is what
-    you meant yesterday). 
-    
-    At any rate, I am getting a "weird" error related to a printf inside the
-    kernel. For some reason the code hangs if I remove it. I'm currently
-    debbugging it, but it is taking longer than I expected.
+    On the other hand, I am pretty sure that this means a loss of performance.
+    I'm now trying to archieve the same result without using "volatile" and see
+    what happens.
 
-    I have also simplified the code that we talked about yesterday (the one that
-    sends buffers from host to device and crashes when the buffer is too small
-    or too big). Now it has barely ~20 lines and it is easily readable.
+- Mario
 
-    I'd like to discuss this new "progress" with you tomorrow if you have time.
-
-    Thank you very much once again!
-
-Best regards,
-Mario
-
-
-
-
-
+*/
 
 
 
