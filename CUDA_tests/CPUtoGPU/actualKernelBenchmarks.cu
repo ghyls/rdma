@@ -61,7 +61,6 @@ int main()
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     int name_len;
 
