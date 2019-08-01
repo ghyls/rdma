@@ -79,16 +79,20 @@ int main(int argc, char *argv[])
 
     int M;
     //for (int N = 4.2e4; N < 2e6; N *= 1.1)
-    for (int N = 1e6; N < 1e8; N *= 2)
+    //for (int N = 2048; N < 65536; N *= 1.02)
+    //for (int N = 65000; N < 66000; N += 5)
+    for (int N = 2; N < 4e7; N *= 1.5)
     {
-        N = 1e7;
+        //N = 3e5;
         M = N;
         MPI_Barrier(MPI_COMM_WORLD);
         p_size = N*sizeof(int);
 
         int *buf_host = (int*)malloc(N*sizeof(int));   // host buffer
         int *buf_dev;
-        cudaMalloc(&buf_dev, N*sizeof(int));       // dev buffer
+        if (rank==1){
+            cudaMalloc(&buf_dev, N*sizeof(int));       // dev buffer
+        }
         
         if (doOnlyMemcpy)
         {
@@ -110,7 +114,7 @@ int main(int argc, char *argv[])
             for (int i = 0; i < nReps; i++)
             {
                 if(rank == 0) {
-                    MPI_Send(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                    MPI_Ssend(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
                 }
                 else { // assume MPI rank 1
                     MPI_Recv(buf_host, M, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -155,6 +159,8 @@ int main(int argc, char *argv[])
             //std::cout << N << " \t" << M << std::endl;
         }
         //cudaFree(buf_dev);
+        //delete[] buf_dev;
+        if (rank==1) {cudaDeviceReset();}
     }
     MPI_Finalize();
 }
