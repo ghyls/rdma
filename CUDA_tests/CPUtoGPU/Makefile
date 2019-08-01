@@ -18,6 +18,7 @@ TARGET := $(BIN_PATH)/$(TARGET_NAME)
 # src files & obj files
 #SRC := $(foreach x, $(SRC_PATH), $(wildcard $(SRC_PATH)/*.cu))
 
+#SRC := $(SRC_PATH)/bufferSendingBenchmarks.cu
 SRC := $(SRC_PATH)/test.cu
 
 OBJ := $(addprefix $(OBJ_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
@@ -58,14 +59,14 @@ mpi_home:
 	nvcc \
 	-I/home/mariog/openmpi-4.0.1/build/include \
 	-L/home/mariog/openmpi-4.0.1/build/lib \
-	-lmpi -g $(SRC) -o $(TARGET_NAME)
+	-lmpi $(SRC) -o $(TARGET_NAME)
 
 .PHONY: mpi_usr
 mpi_usr:
 	nvcc \
 	-I/usr/mpi/gcc/openmpi-4.0.2a1/include \
 	-L/usr/mpi/gcc/openmpi-4.0.2a1/lib64 \
-	-lmpi -g $(SRC) -o $(TARGET_NAME)
+	-lmpi $(SRC) -o $(TARGET_NAME)
 
 .PHONY: help
 help: 
