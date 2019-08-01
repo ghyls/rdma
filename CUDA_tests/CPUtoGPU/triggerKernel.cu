@@ -109,24 +109,7 @@ int main()
 
 
 
-/*
 
-Dear Felice,
-
-    I have just "solved" (I would not say solved) the issue. As far as I
-    uncerstood, it looks like the compiler was assuming that the variable that
-    serves as trigger once the package is recieved was always constant, so
-    passing it as "volatile" did the job. This makes sense for me, since the
-    variable is not being explicetely modified (MPI just writes into its
-    address.)
-
-    On the other hand, I am pretty sure that this means a loss of performance.
-    I'm now trying to archieve the same result without using "volatile" and see
-    what happens.
-
-- Mario
-
-*/
 
 
 
