@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
             for (int i = 0; i < nReps; i++)
             {
                 if(rank == 0) {
-                    MPI_Ssend(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                    MPI_Send(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
                 }
                 else { // assume MPI rank 1
                     MPI_Recv(buf_host, M, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
             {
 
                 if(rank == 0) {
-                    MPI_Ssend(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
+                    MPI_Send(buf_host, N, MPI_INT, 1, 0, MPI_COMM_WORLD);
                     //std::cout << "sent!" << std::endl;                
                 }
                 else if (rank==1) { // assume MPI rank 1

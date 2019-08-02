@@ -1,10 +1,12 @@
 
 #nvcc -I/home/mariog/openmpi-4.0.1/build/include -L/home/mariog/openmpi-4.0.1/build/lib -lmpi bufferSendingBenchmarks.cu -o main
 scp -r *  mariog@felk40.cern.ch:/home/mariog/CUDA_tests/CPUtoGPU
-rm ./benchmarksResults/*.dat
+rm ./benchmarksResults/*
 
-COMMAND = "mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl ^openib main"
-
+COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl ^openib main"
+#COMMAND="mpirun -np 2 --hostfile hosts --mca btl_openib_allow_ib 1 -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl openib main"
+#COMMAND="mpirun -np 2 --hostfile hosts --mca pml ob1 --mca btl openib --mca btl_openib_allow_ib 1 main"
+#COMMAND="mpirun -np 2 --hostfile hosts --mca pml ^ucx --mca btl ^openib --mca btl_openib_allow_ib 1 main"
 #echo "WITH ETH ----------------------------------------------------------------"
 #
 #echo "(one step) host to host"
@@ -19,13 +21,13 @@ COMMAND = "mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx --
 #mpirun -np 2 --hostfile hosts --mca pml ^ucx --mca btl ^openib main 0 0 1 0 > ./benchmarksResults/noUCX_001.dat
 #
 
-echo "WITH UCX, UCX_MEMTYPE_CACHE=n -------------------------------------------"
+echo "UCX_MEMTYPE_CACHE=n -----------------------------------------------------"
 
 echo "(one step) host to host"
-$(COMMAND) 1 1 0 0 > ./benchmarksResults/UCX_110_N.dat
+$COMMAND 1 1 0 0 > ./benchmarksResults/UCX_110_N.dat
 
 echo "one step host to device"
-$(COMMAND) 1 0 1 0 > ./benchmarksResults/UCX_101_N.dat
+$COMMAND 1 0 1 0 > ./benchmarksResults/UCX_101_N.dat
 
 echo "two steps host to device"
-$(COMMAND) 0 0 1 0 > ./benchmarksResults/UCX_001_N.dat
+$COMMAND 0 0 1 0 > ./benchmarksResults/UCX_001_N.dat
