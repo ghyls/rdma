@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
     //for (int N = 65000; N < 66000; N += 5)
     for (int N = 2; N < 4e7; N *= 1.5)
     {
-        //N = 3e5;
         M = N;
         MPI_Barrier(MPI_COMM_WORLD);
         p_size = N*sizeof(int);
