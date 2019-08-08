@@ -59,6 +59,7 @@ class Plotter:
 
         # legend
         self.ax1.legend(loc=legLoc) if legLoc != '' else self.ax1.legend()
+        self.ax1.legend(prop={'family': 'DejaVu Sans Mono'})
             # [ 2    1 ]
             # [ 6    5 ]
             # [ 3    4 ]   
@@ -90,16 +91,16 @@ class Plotter:
                                              label=fitLabel, color = fitColor)
 
 
-    def drawErrorBars(self, errors, linewidth = "", markerwidth = 5, color = "darkolivegreen"):
+    def drawErrorBars(self, errors, linewidth = 0.1, markerwidth = 0, color = "darkolivegreen"):
         
-        self.ax1.errorbar(self.x, self.y, yerr = errors, capsize = 2,
-                        elinewidth = linewidth, markeredgewidth = markerwidth,
-                        fmt = 'none', ecolor = color)
+        self.ax1.errorbar(self.x, self.y, yerr = errors, capsize = 0,
+                        elinewidth = 1, markeredgewidth = markerwidth,
+                        fmt = 'none', ecolor = color, capthick = 0, ms=20, mew=4)
 
         yplus = [self.y[j] + errors[j] for j in range(len(self.x))]
         yless = [self.y[j] +-errors[j] for j in range(len(self.x))]
 
-        self.ax1.fill_between(self.x, yless, yplus, color = color, alpha = 0.1)
+        self.ax1.fill_between(self.x, yless, yplus, color = color, alpha = 0.3)
 
 
     def drawVerticalLine(self, coord, label="", color = "crimson", size = 2, 
