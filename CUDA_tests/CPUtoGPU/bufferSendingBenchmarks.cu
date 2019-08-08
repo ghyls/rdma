@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     if (rank == 0){std::cout << "# p_size (MB)\t" << "time" << std::endl;}
 
     float t_0, t_1;
-    int nReps = 100;
+    int nReps = 5;
 
 
     int M;
