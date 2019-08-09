@@ -38,8 +38,8 @@ int main(int argc, const char * argv[])
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-    float *buf_host = nullptr;
-    float *buf_dev  = nullptr;
+    float *buf_host = 0;
+    float *buf_dev  = 0;
 
     // the size of both buffers (not necessarily the size of the package)
     //const long bufferSize = size*sizeof(float);
