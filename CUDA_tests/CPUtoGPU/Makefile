@@ -61,6 +61,13 @@ mpi_home:
 	-L/home/mariog/openmpi-4.0.1/build/lib \
 	-lmpi $(SRC) -o $(TARGET_NAME)
 
+.PHONY: mpi_cmssw_compiled
+mpi_cmssw_compiled:
+	nvcc \
+	-I/home/mariog/CMSSW/CMSSW_10_6_0_Patatrack/local/ompi/4.0.2a-20190802/include \
+	-L/home/mariog/CMSSW/CMSSW_10_6_0_Patatrack/local/ompi/4.0.2a-20190802/lib \
+	-lmpi $(SRC) -o $(TARGET_NAME)
+
 .PHONY: mpi_usr
 mpi_usr:
 	nvcc \
@@ -72,5 +79,6 @@ mpi_usr:
 help: 
 	@echo "mpi_home:    Use the MPI compiled at /home/mariog/"
 	@echo "mpi_usr:     Use the MPI compiled at /usr/mpi/"
+	@echo "mpi_cmssw_compiled:     Use the MPI compiled at CMSSW"
  
 
