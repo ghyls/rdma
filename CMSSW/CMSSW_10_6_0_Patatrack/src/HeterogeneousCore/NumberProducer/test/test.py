@@ -1,7 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
+
 process = cms.Process("TEST")
-#process.Tracer = cms.Service("Tracer"
+#process.MPIService  = cms.Service("MPIService")
+
+#process.Tracer = cms.Service("Tracer")
 
 
 # All the objects in the chain 
@@ -11,16 +14,16 @@ process.source = cms.Source("EmptySource")
 
 # Edit variables called from NumberProducer::NumberProducer
 process.load('HeterogeneousCore.NumberProducer.numberProducer_cfi')
-process.numberProducer.size = 4
+process.numberProducer.size = 10
 process.numberProducer.seed = 65
 
-# There is no need to do anything on the Gatherer
-process.load('HeterogeneousCore.NumberProducer.numberGatherer_cfi')
-process.numberGatherer.data = 'numberProducer'
+# There is no need to do anything on the Accumulator
+process.load('HeterogeneousCore.NumberProducer.numberAccumulator_cfi')
+process.numberAccumulator.data = 'numberProducer'
 
 # Edit variables called from NumberLogger::NumberLogger
 process.load('HeterogeneousCore.NumberProducer.numberLogger_cfi')
-process.numberLogger.data = 'numberGatherer'
+process.numberLogger.data = 'numberAccumulator'
 
 # We can create another logger
 process.otherLogger = process.numberLogger.clone()
@@ -35,15 +38,15 @@ process.task = cms.Task( process.numberProducer )
 
 # Append elements to the task. 
 # Note that process.* do not define a commutative group under "+"!
-process.path1 = cms.Path(  process.numberGatherer + process.numberLogger, process.task )
+process.path1 = cms.Path(  process.numberAccumulator + process.numberLogger, process.task )
 #process.path2 = cms.Path( process.otherLogger, process.task )
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 # Extra options
 process.options = cms.untracked.PSet(
-    numberOfThreads = cms.untracked.uint32(0),
-    numberOfStreams = cms.untracked.uint32(1),
+    numberOfStreams = cms.untracked.uint32(0),
+    numberOfThreads = cms.untracked.uint32(1),
     wantSummary = cms.untracked.bool(True)
 )
 
