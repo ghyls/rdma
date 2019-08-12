@@ -32,8 +32,7 @@ NumberLogger::NumberLogger(const edm::ParameterSet& config) :
     data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
 
-   // put this as in the producer (just to try)
-   //now do what ever other initialization is needed
+   // now do what ever other initialization is needed
 }
 
 
@@ -45,15 +44,15 @@ NumberLogger::analyze(edm::StreamID sid, const edm::Event& event, const edm::Eve
     auto const& data = * handle;
 
     for (double item: data)
-        std::cout << item << std::endl;
+        std::cout << item << " ";
+    printf("\n");
 }
 
 void
 NumberLogger::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // numberLogger
   edm::ParameterSetDescription desc;
-  //desc.add<edm::InputTag>("data", { "numberProducer" });
-  desc.add<edm::InputTag>("data", { "numberGatherer" }); // What is this for?
+  desc.add<edm::InputTag>("data", { "numberProducer", "numberAccumulator" });
   descriptions.add("numberLogger", desc);
 }
 
