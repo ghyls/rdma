@@ -28,10 +28,11 @@ private:
     const edm::EDGetTokenT<std::vector<double>> data_;
 
 };
-
 NumberLogger::NumberLogger(const edm::ParameterSet& config) :
-   data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
+    data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
+
+   // put this as in the producer (just to try)
    //now do what ever other initialization is needed
 }
 
@@ -51,7 +52,8 @@ void
 NumberLogger::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // numberLogger
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("data", { "numberProducer" });
+  //desc.add<edm::InputTag>("data", { "numberProducer" });
+  desc.add<edm::InputTag>("data", { "numberGatherer" }); // What is this for?
   descriptions.add("numberLogger", desc);
 }
 

@@ -1,5 +1,6 @@
 // system include files
 #include <memory>
+#include <iostream>
 
 // user include files
 #include "FWCore/Framework/interface/Event.h"
@@ -27,11 +28,13 @@ private:
     virtual void endStream() override;
 
     const uint32_t size_;
+    const uint32_t seed_;
 
 };
 
 NumberProducer::NumberProducer(const edm::ParameterSet& config) :
-   size_(config.getParameter<uint32_t>("size"))
+   size_(config.getParameter<uint32_t>("size")),
+   seed_(config.getParameter<uint32_t>("seed"))
 {
    //register your products
    produces<std::vector<double>>();
@@ -43,10 +46,17 @@ NumberProducer::NumberProducer(const edm::ParameterSet& config) :
 void
 NumberProducer::produce(edm::Event& event, const edm::EventSetup& setup)
 {
+    // Create the data, initialized to zeros
     auto data = std::make_unique<std::vector<double>>(size_);
 
-    // fill the data ...
+    // plant the seed
+    srand(seed_);
 
+    // init it with a random seed
+    for (uint32_t i = 0; i < size_; i++) 
+    {
+        (*data)[i] = (double) rand() / RAND_MAX;
+    }
 
     event.put(std::move(data));
 }
@@ -65,6 +75,7 @@ NumberProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // numberProducer
   edm::ParameterSetDescription desc;
   desc.add<unsigned int>("size", 32);
+  desc.add<unsigned int>("seed", 32);
   descriptions.add("numberProducer", desc);
 }
 
