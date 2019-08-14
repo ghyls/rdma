@@ -43,9 +43,7 @@ NumberAccumulator::NumberAccumulator(const edm::ParameterSet& config) :
 void
 NumberAccumulator::produce(edm::Event& event, const edm::EventSetup& setup)
 {
-
-
-
+    
     // read from the NumberProducer
     edm::Handle<std::vector<double>> handle;
     event.getByToken(data_, handle);
