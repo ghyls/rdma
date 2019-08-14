@@ -1,6 +1,7 @@
 // system include files
 #include <iostream>
 #include <vector>
+#include <string>
 
 // user include files
 #include "FWCore/Framework/interface/Event.h"
@@ -14,7 +15,6 @@
 
 
 // class declaration
-
 class NumberLogger : public edm::global::EDAnalyzer<> {
 public:
     explicit NumberLogger(const edm::ParameterSet& config);
@@ -28,11 +28,37 @@ private:
     const edm::EDGetTokenT<std::vector<double>> data_;
 
 };
+
+
+void LOG(std::string message, int t)
+{
+    /*
+    t  ==  0 -> info  (white)
+    t  ==  1 -> debug (blue)
+    t  == -1 -> error (red)
+    */
+
+    bool info  = 1;
+    bool debug = 1;
+    bool error = 1;
+
+    switch (t)
+    {
+        case -1: if (error) {std::cout << "\033[1;31m" << message << "\033[0m" << std::endl;} ; break;
+        case  0: if (info)  {std::cout << "\033[0;32m" << message << "\033[0m" << std::endl;} ; break;
+        case  1: if (debug) {std::cout << "\033[1;34m" << message << "\033[0m" << std::endl;} ; break;
+
+        default:
+            break;
+    }
+}
+
+
 NumberLogger::NumberLogger(const edm::ParameterSet& config) :
     data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
-
-   // now do what ever other initialization is needed
+    LOG("[NumberLogger::NumberLogger]:  Constructor called", 0);
+    // now do what ever other initialization is needed
 }
 
 
