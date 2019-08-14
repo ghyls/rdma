@@ -22,12 +22,16 @@ process.load('HeterogeneousCore.NumberProducer.numberAccumulator_cfi')
 process.numberAccumulator.data = 'numberProducer'
 
 # Edit variables called from NumberLogger::NumberLogger
-process.load('HeterogeneousCore.NumberProducer.numberLogger_cfi')
-process.numberLogger.data = 'numberAccumulator'
+process.load('HeterogeneousCore.NumberProducer.numberOffloader_cfi')
+process.numberOffloader.data = 'numberProducer'
 
-# We can create another logger
-process.otherLogger = process.numberLogger.clone()
-process.otherLogger.data = 'numberProducer'
+# Edit variables called from NumberLogger::NumberLogger
+process.load('HeterogeneousCore.NumberProducer.numberLogger_cfi')
+process.numberLogger.data = 'numberOffloader'
+
+## We can create another logger
+#process.otherLogger = process.numberLogger.clone()
+#process.otherLogger.data = 'numberProducer'
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -38,8 +42,13 @@ process.task = cms.Task( process.numberProducer )
 
 # Append elements to the task. 
 # Note that process.* do not define a commutative group under "+"!
-process.path1 = cms.Path(  process.numberAccumulator + process.numberLogger, process.task )
-#process.path2 = cms.Path( process.otherLogger, process.task )
+
+## Serial Path:
+#process.path1 = cms.Path(  process.numberAccumulator + process.numberLogger, process.task )
+
+# Parallel Path:
+process.path2 = cms.Path( process.numberAccumulator + process.numberOffloader + 
+                            process.numberLogger, process.task )
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
