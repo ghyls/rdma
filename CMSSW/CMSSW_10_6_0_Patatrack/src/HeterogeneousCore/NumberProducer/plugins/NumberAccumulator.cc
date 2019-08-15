@@ -14,6 +14,8 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 
+extern void LOG(std::string message, int t);
+
 // class declaration
 
 class NumberAccumulator : public edm::stream::EDProducer<> {
@@ -34,9 +36,8 @@ private:
 NumberAccumulator::NumberAccumulator(const edm::ParameterSet& config) :
     data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
-   
+   LOG("[NumberAccumulator::NumberAccumulator]:  Constructor called", 2);
    produces<std::vector<double>>(); // only consisting on one element!
-
 }
 
 
