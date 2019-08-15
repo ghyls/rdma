@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("TEST")
 
-#process.MPIService  = cms.Service("MPIService")
+process.MPIService  = cms.Service("MPIService")
 #process.Tracer = cms.Service("Tracer")
 
 
@@ -21,11 +21,7 @@ process.load('HeterogeneousCore.NumberProducer.numberAccS_cfi')
 
 # Tasks and paths 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# create the first task
-process.task = cms.Task( process.numberAccS )
-
-# Append elements to the task. 
-process.path1 = cms.Path( process.numberAccS, process.task )
+process.path1 = cms.Path( process.numberAccS)
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 

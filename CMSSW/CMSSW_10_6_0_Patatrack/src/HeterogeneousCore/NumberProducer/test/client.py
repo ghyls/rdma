@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 process = cms.Process("TEST")
-#process.MPIService  = cms.Service("MPIService")
+process.MPIService  = cms.Service("MPIService")
 
 #process.Tracer = cms.Service("Tracer")
 
@@ -29,9 +29,9 @@ process.numberOffloader.data = 'numberProducer'
 process.load('HeterogeneousCore.NumberProducer.numberLogger_cfi')
 process.numberLogger.data = 'numberOffloader'
 
-## We can create another logger
-#process.otherLogger = process.numberLogger.clone()
-#process.otherLogger.data = 'numberProducer'
+# We can create another logger
+process.SerialNumberLogger = process.numberLogger.clone()
+process.SerialNumberLogger.data = 'numberAccumulator'
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -44,11 +44,12 @@ process.task = cms.Task( process.numberProducer )
 # Note that process.* do not define a commutative group under "+"!
 
 ## Serial Path:
-#process.path1 = cms.Path(  process.numberAccumulator + process.numberLogger, process.task )
+#process.path1 = cms.Path( process.numberAccumulator + process.SerialNumberLogger, 
+#                            process.task )
 
 # Parallel Path:
-process.path2 = cms.Path( process.numberAccumulator + process.numberOffloader + 
-                            process.numberLogger, process.task )
+process.path2 = cms.Path( process.numberOffloader + 
+                           process.numberLogger, process.task )
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
