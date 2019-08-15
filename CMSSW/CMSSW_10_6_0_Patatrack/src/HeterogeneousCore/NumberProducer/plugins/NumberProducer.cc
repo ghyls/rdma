@@ -13,6 +13,8 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 
+extern void LOG(std::string message, int t);
+
 // class declaration
 
 class NumberProducer : public edm::stream::EDProducer<> {
@@ -36,10 +38,11 @@ NumberProducer::NumberProducer(const edm::ParameterSet& config) :
    size_(config.getParameter<uint32_t>("size")),
    seed_(config.getParameter<uint32_t>("seed"))
 {
-   //register your products
-   produces<std::vector<double>>();
+    //register your products
+    produces<std::vector<double>>();
+    LOG("[NumberProducer::NumberProducer]:  Constructor called", 2);
 
-   //now do what ever other initialization is needed
+    //now do what ever other initialization is needed
 }
 
 
