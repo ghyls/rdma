@@ -37,12 +37,14 @@ private:
 NumberOffloader::NumberOffloader(const edm::ParameterSet& config) :
     data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
-    MPI_Init(NULL, NULL);
+    //MPI_Init(NULL, NULL);
     produces<std::vector<double>>();
+    LOG("[NumberOffloader::NumberOffloader]:  Constructor called. initialized MPI enviroment", 2);
 }
 NumberOffloader::~NumberOffloader()
 {
-    MPI_Finalize();
+    LOG("[NumberOffloader::~NumberOffloader]:  Destructor called. Finalized MPI enviroment", 2);
+    //MPI_Finalize();
 }
 
 void
@@ -57,38 +59,35 @@ NumberOffloader::produce(edm::Event& event, const edm::EventSetup& setup)
     LOG("[NumberOffloader::produce]:  SIZE: " + std::to_string(size), 1);
 
     // Only rank 0 is supposed to be here
-    //if (1)
-    if (rank == 0)
-    {
         
-        // read from the NumberProducer
-        edm::Handle<std::vector<double>> handle;
-        event.getByToken(data_, handle);
-        auto const& data = * handle;
+    // read from the NumberProducer
+    edm::Handle<std::vector<double>> handle;
+    event.getByToken(data_, handle);
+    auto const& data = * handle;
 
-        // store the length of the package
-        int len = data.size();
+    // store the length of the package
+    int len = data.size();
 
-        // Create the output vector (will be filled with Server's output)
-        auto result = std::make_unique<std::vector<double>>(1);
+    // Create the output vector (will be filled with Server's output)
+    auto result = std::make_unique<std::vector<double>>(1);
 
-        // send the size of the vector to the accumulator
-        MPI_Ssend(&len, 1, MPI_INT, 1, 99, MPI_COMM_WORLD);
-        LOG("[NumberOffloader::produce]:  len sent!", 0);
+    // send the size of the vector to the accumulator
+    MPI_Ssend(&len, 1, MPI_INT, 1, 99, MPI_COMM_WORLD);
+    LOG("[NumberOffloader::produce]:  len sent!", 0);
 
-        // send the vector to the accumulator (rank of the sender is 0)
-        MPI_Ssend(&data[0], len, MPI_DOUBLE, 1, 100, MPI_COMM_WORLD);
-        LOG("[NumberOffloader::produce]:  data sent!", 0);
+    // send the vector to the accumulator (rank of the sender is 0)
+    MPI_Ssend(data.data(), len, MPI_DOUBLE, 1, 100, MPI_COMM_WORLD);
+    LOG("[NumberOffloader::produce]:  data sent!", 0);
+
+    // recive the result from the accumulator
+    MPI_Recv(result->data(), 1, MPI_DOUBLE, 1, 101, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    LOG("[NumberOffloader::produce]:  result received!", 0);
+
+    event.put(std::move(result));    
     
-        // recive the result from the accumulator
-        MPI_Recv(&(*result)[0], 1, MPI_DOUBLE, 1, 101, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        LOG("[NumberOffloader::produce]:  result received!", 0);
-
-        event.put(std::move(result));    
-        
-        //(*result)[0] = 33;
-        //event.put(std::move(result));
-    }  
+    //(*result)[0] = 33;
+    //event.put(std::move(result));
+     
 }
 
 void
