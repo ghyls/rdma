@@ -40,7 +40,7 @@ NumberProducer::NumberProducer(const edm::ParameterSet& config) :
 {
     //register your products
     produces<std::vector<double>>();
-    LOG("[NumberProducer::NumberProducer]:  Constructor called", 2);
+    LOG("[NumberProducer::NumberProducer]:  Constructor called", 1);
 
     //now do what ever other initialization is needed
 }

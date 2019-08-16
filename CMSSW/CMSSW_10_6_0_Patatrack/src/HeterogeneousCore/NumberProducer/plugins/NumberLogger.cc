@@ -40,7 +40,7 @@ void LOG(std::string message, int t)
     */
 
     bool info  = 1;
-    bool debug = 1;
+    bool debug = 0;
     bool error = 1;
     bool info2 = 1;
 
@@ -60,7 +60,7 @@ void LOG(std::string message, int t)
 NumberLogger::NumberLogger(const edm::ParameterSet& config) :
     data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
-    LOG("[NumberLogger::NumberLogger]:  Constructor called", 2);
+    LOG("[NumberLogger::NumberLogger]:  Constructor called", 1);
     // now do what ever other initialization is needed
 }
 
@@ -73,7 +73,7 @@ NumberLogger::analyze(edm::StreamID sid, const edm::Event& event, const edm::Eve
     auto const& data = * handle;
 
     for (double item: data)
-        LOG(std::to_string(item), 2);
+        LOG("[NumberLogger::analyze]:  " + std::to_string(item), 2);
         //std::cout << item << " ";
     printf("\n");
 }
