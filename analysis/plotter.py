@@ -9,6 +9,7 @@ from scipy.optimize import curve_fit
 class Plotter:
 
     m = 1.2
+    kfactor = 1
 
     def __init__(self, size):
         self.fig1 = plt.figure(figsize=size)
@@ -72,13 +73,18 @@ class Plotter:
         return popt, perr
 
 
-    x = []; y = []
+    x = []
+    y = []
+
     def addSubplot(self, x, y, fit = False, func = '', p0 = [], 
         dataLabel='', dataStyle='.', fitStyle='-', fitLabel = '', color=None, 
         size = 12, width = 12,  fitColor='c'):
 
-        self.x = x; self.y = y
+        if self.kfactor != 1: y = [elem * self.kfactor for elem in y]
 
+        self.x = x
+        self.y = y
+        
         self.ax1.plot(x, y, dataStyle, linewidth=width, label=dataLabel, 
                 color = color, markersize = size)
 
@@ -95,7 +101,7 @@ class Plotter:
         
         self.ax1.errorbar(self.x, self.y, yerr = errors, capsize = 0,
                         elinewidth = 1, markeredgewidth = markerwidth,
-                        fmt = 'none', ecolor = color, capthick = 0, ms=20, mew=4)
+                        fmt = 'none', ecolor = color, capthick = 0, ms=20)
 
         yplus = [self.y[j] + errors[j] for j in range(len(self.x))]
         yless = [self.y[j] +-errors[j] for j in range(len(self.x))]
@@ -121,7 +127,24 @@ class Plotter:
                             dpi = dpi, transparent = transparent)
 
 
+def meanAndStd(filePaths, dataColumn = 1, mult = 1e6):
 
+    mean = []
+    error = []
+    matrix = []
+
+    for i in range(len(filePaths)): # load all dataFiles (one np.loadtxt per file)
+
+        matrix.append(np.loadtxt(filePaths[i])[:,dataColumn])
+
+    for i in range(len(matrix[0])): # for each data entry
+
+        temp = np.array(matrix)[:,i] * mult
+
+        mean.append(np.mean(temp))
+        error.append(np.std(temp))
+
+    return [mean, error]
 
 def getR2(func, x, y, p0):
      
