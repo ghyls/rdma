@@ -14,7 +14,7 @@ process.source = cms.Source("EmptySource")
 
 # We only load the accumulator here
 process.load('HeterogeneousCore.NumberProducer.numberAccS_cfi')
-#process.numberLogger.data = 'numberGatherer'
+process.numberAccS.baseTag = 42
 
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

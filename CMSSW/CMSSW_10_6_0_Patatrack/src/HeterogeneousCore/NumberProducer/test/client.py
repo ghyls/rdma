@@ -21,9 +21,11 @@ process.numberProducer.seed = 65
 process.load('HeterogeneousCore.NumberProducer.numberAccumulator_cfi')
 process.numberAccumulator.data = 'numberProducer'
 
-# Edit variables called from NumberLogger::NumberLogger
+# Edit variables called from numberOffloader::numberOffloader
 process.load('HeterogeneousCore.NumberProducer.numberOffloader_cfi')
 process.numberOffloader.data = 'numberProducer'
+process.numberOffloader.baseTag = 42
+
 
 # Edit variables called from NumberLogger::NumberLogger
 process.load('HeterogeneousCore.NumberProducer.numberLogger_cfi')
