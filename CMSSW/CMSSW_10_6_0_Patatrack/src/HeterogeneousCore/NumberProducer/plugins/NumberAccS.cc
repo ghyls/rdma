@@ -5,6 +5,8 @@
 #include <cuda.h>
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "header.h"
+#include <chrono>
+#include <thread>
 
 // user include files
 #include "FWCore/Framework/interface/Event.h"
@@ -34,14 +36,16 @@ private:
     virtual void produce(edm::Event& event, const edm::EventSetup& setup) override;
     virtual void endStream() override;
     
+    const uint32_t baseTag_;
 };
 
 
 
-NumberAccS::NumberAccS(const edm::ParameterSet& config)
+NumberAccS::NumberAccS(const edm::ParameterSet& config) :
+    baseTag_(config.getParameter<uint32_t>("baseTag"))
 {
     LOG("[NumberAccS::NumberAccS]:  Constructor called.", 1);
-    produces<std::vector<double>>(); // only consisting on one element!
+    produces<std::vector<double>>();
 }
 NumberAccS::~NumberAccS()
 {
@@ -66,23 +70,22 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
     MPI_Status status;
 
     LOG("[NumberAccS::produce]:  Probing the incoming buffer", 1);
-    MPI_Probe(0, 98, MPI_COMM_WORLD, &status);
+    MPI_Probe(0, baseTag_ + 98, MPI_COMM_WORLD, &status);
 
     LOG("[NumberAccS::produce]:  reading the length of the buffer", 1);
     MPI_Get_count(&status, MPI_DOUBLE, &len);
 
-    bool useGPU    = false;
-    bool GPUDirect = false;
+    bool useGPU    = true;
+    bool GPUDirect = true;
 
     double *input;
     if (!GPUDirect)
     {
-        LOG("[NumberAccS::produce]:  The package will be received on the host, "
-            "and then copied to the device.", 0);   
+        LOG("[NumberAccS::produce]:  H -> H -> D.", 0);   
 
         input = (double*)malloc(len * sizeof(double));   // host buffer
         // Recv the actual buffer
-        MPI_Recv(&input[0], len, MPI_DOUBLE, 0, 98, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&input[0], len, MPI_DOUBLE, 0, baseTag_ + 98, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         LOG("[NumberAccS::produce]:  data Received", 1);   
     }
 
@@ -102,15 +105,14 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
         cudaCheck( cudaMalloc((void **) &sum_d, sizeof(double)) );
 
         if (GPUDirect){
-            LOG("[NumberAccS::produce]:  The package is about to be received "
-                                        "directly on the device (GPU).", 0);
+            LOG("[NumberAccS::produce]:  H -> GPU (RDMA).", 0);
             LOG("[NumberAccS::produce]:  Receiving the package on the GPU", 1);
-            MPI_Recv(buf_d, len, MPI_DOUBLE, 0, 98, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(buf_d, len, MPI_DOUBLE, 0, baseTag_ + 98, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             LOG("[NumberAccS::produce]:  Received the package on the GPU", 1);
         }
         else{
             // Move the host array to the GPU
-            LOG("[NumberAccS::produce]: Copying the package H->D", 1);
+            LOG("[NumberAccS::produce]: Copying the package H -> D", 1);
             cudaMemcpy(buf_d, input, len * sizeof(double), cudaMemcpyHostToDevice);            
         }
 
@@ -121,7 +123,9 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
         if (GPUDirect)
         {
             LOG("[NumberAccS::produce]:  Sending the result (DtoH)", 1);
-            MPI_Ssend(sum_d, 1, MPI_DOUBLE, 0, 101, MPI_COMM_WORLD);
+            //std::this_thread::sleep_for(std::chrono::seconds(10));
+            MPI_Ssend(sum_d, 1, MPI_DOUBLE, 0, baseTag_ + 101, MPI_COMM_WORLD);
+            
             LOG("[NumberAccS::produce]:  result Sent (DtoH)", 1);
         }
         else
@@ -130,7 +134,7 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
             LOG("[NumberAccS::produce]:   Result: " + std::to_string(sum_h[0]), 2);
             
             // send the sum back to the offloader
-            MPI_Ssend(sum_h, 1, MPI_DOUBLE, 0, 101, MPI_COMM_WORLD);
+            MPI_Ssend(sum_h, 1, MPI_DOUBLE, 0, baseTag_ + 101, MPI_COMM_WORLD);
             LOG("[NumberAccS::produce]:  result Sent (HtoH)", 1);
         }
         
@@ -150,13 +154,10 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
         for (int i = 0; i < len; i++)
             sum_h[0] += input[i];
 
-        MPI_Ssend(sum_h, 1, MPI_DOUBLE, 0, 101, MPI_COMM_WORLD);
+        MPI_Ssend(sum_h, 1, MPI_DOUBLE, 0, baseTag_ + 101, MPI_COMM_WORLD);
         LOG("[NumberAccS::produce]:  result Sent (HtoH)", 1);
     }
 
-
-
-    
 }
 
 void
@@ -172,6 +173,7 @@ void
 NumberAccS::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // NumberAccS
   edm::ParameterSetDescription desc;
+  desc.add<unsigned int>("baseTag", 32);  
   descriptions.add("numberAccS", desc);
 }
 
