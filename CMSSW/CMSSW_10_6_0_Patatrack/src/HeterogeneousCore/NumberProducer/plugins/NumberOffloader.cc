@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <chrono>
 #include <thread>
+//#include <mutex>
 
 // user include files
 #include "FWCore/Framework/interface/Event.h"
@@ -142,3 +143,30 @@ NumberOffloader::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
 //define this as a plug-in
 DEFINE_FWK_MODULE(NumberOffloader);
 
+
+
+
+
+
+
+
+
+
+//static void mpiServ(uint32_t baseTag, edm::WaitingTaskWithArenaHolder holder);
+
+
+//std::mutex m;
+//void NumberOffloader::mpiServ(uint32_t baseTag, edm::WaitingTaskWithArenaHolder holder)
+//{
+//    m.lock();
+//
+//        int flag = false;
+//        while (not flag)
+//        {
+//            MPI_Iprobe(1, baseTag + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+//            std::this_thread::sleep_for(std::chrono::microseconds(1));
+//        }
+//        LOG("[NumberOffloader::mpiServ]:  Found the package!", 1);
+//    
+//    m.unlock();
+//}
