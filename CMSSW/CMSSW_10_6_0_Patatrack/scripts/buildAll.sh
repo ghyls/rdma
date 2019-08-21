@@ -36,7 +36,7 @@ mkdir build
 cd build
 ../configure --with-pic --prefix=$NUMACTL_BASE
 
-make -j
+make -j3
 make install
 
 # libnl 3.2.25
@@ -60,7 +60,7 @@ cd build
   --with-pic --with-gnu-ld \
   --prefix=$LIBNL_BASE
 
-make -j
+make -j3
 make install
 
 # rdma-core 25.0
@@ -94,7 +94,7 @@ cmake \
 
 TMP=`mktemp -p .` && cat cmake_install.cmake | grep -v man/cmake_install.cmake > $TMP && mv $TMP cmake_install.cmake
 
-make -j
+make -j3
 make install
 
 
@@ -114,7 +114,7 @@ cd knem-1.1.3
 mkdir build
 cd build
 ../configure --prefix=$KNEM_BASE
-make -j
+make -j3
 make install
 
 # xpmem
@@ -138,7 +138,7 @@ git reset --hard $XPMEM_HASH
   --with-pic --with-gnu-ld \
   --prefix=$XPMEM_BASE
 
-make -j
+make -j3
 make install
 
 # gdrcopy 1.3     #I could not solve the errors here.
@@ -210,7 +210,7 @@ LIBS="-libverbs" \
   --with-xpmem=$XPMEM_BASE \
   --without-ugni
 
-make -j
+make -j3
 make install
 
 # libevent
@@ -230,7 +230,7 @@ cd libevent-2.1.11-stable
 mkdir build
 cd build
 ../configure --prefix=$LIBEVENT_BASE --disable-samples --enable-shared --with-pic --with-gnu-ld
-make -j
+make -j3
 make install
 
 
@@ -289,7 +289,7 @@ LDFLAGS="-L$LIBNL_BASE/lib" \
   #--with-ofi=$OFI_BASE \           // unbounded variable
   #--with-verbs=$RDMA_CORE_BASE \   // weird (syntax?) errors
 
-make -j
+make -j3
 make install
 
 # other flags we may need, but require additional libraries
