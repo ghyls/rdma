@@ -40,7 +40,7 @@ void LOG(std::string message, int t)
     */
 
     bool info  = 1;
-    bool debug = 1;
+    bool debug = 0;
     bool error = 1;
     bool info2 = 1;
 
