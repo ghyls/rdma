@@ -12,7 +12,7 @@
 void work(int rank, int SLEEP_TIME, int SIZE)
 {
 
-    //std::cout << "rank " << rank << " start" << std::endl;
+    std::cout << "rank " << rank << " start" << std::endl;
 
 
     // = = = = = = = = = = = = = =
@@ -33,22 +33,23 @@ void work(int rank, int SLEEP_TIME, int SIZE)
             data[i] = (double) rand() / RAND_MAX;
         }
 
-        //std::cout << "rank " << rank << " sending" << std::endl;
+        std::cout << "rank " << rank << " sending" << std::endl;
         MPI_Send(data, SIZE, MPI_DOUBLE, 1, 98, MPI_COMM_WORLD);
 
         int flag = false;
-        //std::cout << "rank " << rank << " polling" << std::endl;
+        std::cout << "rank " << rank << " polling" << std::endl;
         //std::cout << "measure" << std::endl;
-        while (not flag)
-        {
-            MPI_Iprobe(1, 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
-            std::this_thread::sleep_for(std::chrono::microseconds(SLEEP_TIME));
-        }
+        //while (not flag)
+        //{
+        //    MPI_Iprobe(1, 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+        //    std::this_thread::sleep_for(std::chrono::microseconds(100000));
+        //    std::cout << "rank " << rank << ". . ." << std::endl;
+        //}
 
         int len = 0;
         MPI_Status status;
 
-        //std::cout << "rank " << rank << " Probing" << std::endl;
+        std::cout << "rank " << rank << " Probing" << std::endl;
         MPI_Probe(1, 101, MPI_COMM_WORLD, &status);
         MPI_Get_count(&status, MPI_DOUBLE, &len);
 
@@ -56,24 +57,25 @@ void work(int rank, int SLEEP_TIME, int SIZE)
         double *result = (double*)malloc(len * sizeof(double));   // host buffer
 
         // recive the result from the accumulator
+        
         MPI_Recv(result, 1, MPI_DOUBLE, 1, 101, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        //std::cout << "rank " << rank << " offloader done" << std::endl;
+        std::cout << "rank " << rank << " offloader done" << std::endl;
     }
     else
     {
-        //std::cout << "rank " << rank << " start" << std::endl;
+        std::cout << "rank " << rank << " start" << std::endl;
         int len; // length of the data package
 
         MPI_Status status;
 
-        //std::cout << "rank " << rank << " probing" << std::endl;
+        std::cout << "rank " << rank << " probing" << std::endl;
         MPI_Probe(0, 98, MPI_COMM_WORLD, &status);
 
         MPI_Get_count(&status, MPI_DOUBLE, &len);
 
 
-        //std::cout << "rank " << rank << " allocating " << len <<  std::endl;
+        std::cout << "rank " << rank << " allocating " << len <<  std::endl;
         // The array to be summed will be stored here on the GPU
         double *buf_d;
         cudaMalloc((void**)&buf_d, len * sizeof(double));
@@ -82,16 +84,16 @@ void work(int rank, int SLEEP_TIME, int SIZE)
         double *sum_d;
         cudaMalloc((void**)&sum_d, sizeof(double));
 
-        //std::cout << "rank " << rank << " recv 98" << std::endl;
+        std::cout << "rank " << rank << " recv 98" << std::endl;
         MPI_Recv(buf_d, len, MPI_DOUBLE, 0, 98, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        //std::cout << "rank " << rank << " kernel" << std::endl;
+        std::cout << "rank " << rank << " kernel" << std::endl;
         cudaWrapper(buf_d, sum_d, len);
 
-        //std::cout << "rank " << rank << " send 101" << std::endl;
-        MPI_Send(&sum_d, 1, MPI_DOUBLE, 0, 101, MPI_COMM_WORLD);
+        std::cout << "rank " << rank << " send 101" << std::endl;
+        MPI_Ssend(sum_d, 1, MPI_DOUBLE, 0, 101, MPI_COMM_WORLD);
 
-        //std::cout << "rank " << rank << " freee" << std::endl;
+        std::cout << "rank " << rank << " freee" << std::endl;
         //cudaFree(buf_d);
         //cudaFree(sum_d);
     }
@@ -119,6 +121,8 @@ int main()
     
     int min_sleep_time = 1;
     int max_sleep_time = 200;
+    
+    work(rank, SLEEP_TIME, SIZE);
 
     if (rank==0){
         std::cout << -1 << " ";
@@ -133,14 +137,12 @@ int main()
         if (rank==0) std::cout << SIZE << " ";
         for (SLEEP_TIME = min_sleep_time; SLEEP_TIME < max_sleep_time; SLEEP_TIME += 20)
         {
-            //std::cout << "ashd" << std::endl;
             t0 = MPI_Wtime();
-            work(rank, SLEEP_TIME, SIZE);
+            //work(rank, SLEEP_TIME, SIZE);
             t1 = MPI_Wtime();
 
             TIME = t1 - t0;
             if (rank==0) std::cout << TIME << " ";
-
         }
         if (rank==0) printf("\n");
     }
