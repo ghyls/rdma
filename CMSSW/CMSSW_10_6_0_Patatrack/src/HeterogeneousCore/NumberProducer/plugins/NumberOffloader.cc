@@ -74,25 +74,25 @@ NumberOffloader::acquire(edm::Event const& event, edm::EventSetup const& setup, 
     LOG("[NumberOffloader::acquire]:  data sent!", 1);
 
 
-    auto task = [holder](uint32_t baseTag_){
-        // Probing for incoming buffers
-        LOG("[NumberOffloader::acquire]:  Waiting for the result of the Accumulator", 1);
-        int flag = false;
-        while (not flag)
-        {
-            MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-        }
-    };
-    std::thread thr(task, baseTag_);
-    thr.detach();
+    //auto task = [holder](uint32_t baseTag_){
+    //    // Probing for incoming buffers
+    //    LOG("[NumberOffloader::acquire]:  Waiting for the result of the Accumulator", 1);
+    //    int flag = false;
+    //    while (not flag)
+    //    {
+    //        MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+    //        std::this_thread::sleep_for(std::chrono::microseconds(1));
+    //    }
+    //};
+    //std::thread thr(task, baseTag_);
+    //thr.detach();
         
-    //int flag = false;
-    //while (not flag)
-    //{
-    //    MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
-    //    std::this_thread::sleep_for(std::chrono::microseconds(1));
-    //}
+    int flag = false;
+    while (not flag)
+    {
+        MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
     
     LOG("[NumberOffloader::acquire]:  main thread finished", 1);
 }
