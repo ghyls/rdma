@@ -88,9 +88,9 @@ cmake \
   -DPANDOC_EXECUTABLE= \
   -DRST2MAN_EXECUTABLE= \
   -DNO_PYVERBS=1 \
-  -DENABLE_RESOLVE_NEIGH=0\
   ..
 
+#-DENABLE_RESOLVE_NEIGH=0\
 
 TMP=`mktemp -p .` && cat cmake_install.cmake | grep -v man/cmake_install.cmake > $TMP && mv $TMP cmake_install.cmake
 
@@ -141,7 +141,7 @@ git reset --hard $XPMEM_HASH
 make -j3
 make install
 
-# gdrcopy 1.3     #I could not solve the errors here.
+# gdrcopy 1.3
 # ===========
 
 ## exported environment
@@ -252,9 +252,6 @@ cd ompi-4.0.2a-$OPENMPI_DATE
 git reset --hard $OPENMPI_HASH
 ./autogen.pl
 
-#wget https://download.open-mpi.org/release/open-mpi/v4.0/#openmpi-4.0.1.tar.gz
-#tar -xaf openmpi-4.0.1.tar.gz
-#cd openmpi-4.0.1/
 
 mkdir build
 cd build
@@ -286,8 +283,8 @@ LDFLAGS="-L$LIBNL_BASE/lib" \
   --with-knem=$KNEM_BASE \
   --with-cma \
   --without-ugni
-  #--with-ofi=$OFI_BASE \           // unbounded variable
-  #--with-verbs=$RDMA_CORE_BASE \   // weird (syntax?) errors
+  #--with-verbs=$RDMA_CORE_BASE    # weird (syntax?) errors
+  #--with-ofi=$OFI_BASE \          # unbounded variable
 
 make -j3
 make install
