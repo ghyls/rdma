@@ -21,12 +21,6 @@
 
 // 2147483647
 
-/* After printing some memory addresses, I have noticed that the segmentation
-faults occur because MPI is still trying to write in the device after the buffer
-is over. Since the floats weight 4 bytes both in Patatrack and in Felk, it could
-be most likely because MPI doesn't start writing the buffer right at the
-beginning. I am still trying to prove this.*/
-
 
 //int main()
 int main(int argc, const char * argv[])
@@ -38,7 +32,9 @@ int main(int argc, const char * argv[])
     int size = argc > 1 ? atoi(argv[1]) : N;
     //int size = N;
     
-    MPI_Init(NULL, NULL);
+    int provided;
+    MPI_Init_thread(nullptr, nullptr, MPI_THREAD_MULTIPLE, &provided);
+    
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
     float *buf_host ;
@@ -49,7 +45,9 @@ int main(int argc, const char * argv[])
 
     buf_host = (float*)malloc(bufferSize);
 
+    cudaMalloc(&buf_dev, bufferSize);               // works with small pkgs    
 	cudaMalloc(&buf_dev, bufferSize);               // works with small pkgs    
+    cudaMalloc(&buf_dev, bufferSize);               // works with small pkgs    
 
     if (rank == 0) {
         printf("-------->     r0_0\n");
@@ -68,7 +66,7 @@ int main(int argc, const char * argv[])
         printf("-------->     r1_1\n");
     }
 
-
+    MPI_Barrier(MPI_COMM_WORLD);
     free(buf_host);
 	cudaFree(buf_dev);
     
