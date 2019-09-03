@@ -5,7 +5,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "mpi.h"
-
+#include "cudaCheck.h"
 
 
 
@@ -26,29 +26,29 @@
 int main(int argc, const char * argv[])
 {
 
-    printf("hello\n");
-
-    int rank;
     int size = argc > 1 ? atoi(argv[1]) : N;
-    //int size = N;
     
-    int provided;
-    MPI_Init_thread(nullptr, nullptr, MPI_THREAD_MULTIPLE, &provided);
+    MPI_Init(nullptr, nullptr);
     
+    int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-    float *buf_host ;
-    float *buf_dev  ;
+    std::cout << "hi from rank " << rank << std::endl;
+
+    int *buf_host ;
+    int *buf_dev  ;
 
     // the size of both buffers (not necessarily the size of the package)
-    int bufferSize = size*sizeof(float);
+    int bufferSize = size*sizeof(int);
 
-    buf_host = (float*)malloc(bufferSize);
+    buf_host = (int*)malloc(bufferSize);
+    
+    cudaCheck( cudaMalloc((void**)&buf_dev, bufferSize) );
+    cudaCheck( cudaMemset(buf_dev, 0, bufferSize)       );
+    
 
-    cudaMalloc(&buf_dev, bufferSize);               // works with small pkgs    
-	cudaMalloc(&buf_dev, bufferSize);               // works with small pkgs    
-    cudaMalloc(&buf_dev, bufferSize);               // works with small pkgs    
-
+    MPI_Barrier(MPI_COMM_WORLD);
+    
     if (rank == 0) {
         printf("-------->     r0_0\n");
         //MPI_Send(buf_host, size, MPI_FLOAT, 1, 0, MPI_COMM_WORLD);
@@ -58,19 +58,21 @@ int main(int argc, const char * argv[])
         printf("-------->     r0_1\n");
     } else { 
         // receive into the device buffer
-        printf("-------->     r1_0\n");
+        printf("-------->     r1_0\n"); 
         //MPI_Recv(buf_dev, size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        MPI_Send(buf_dev, size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+        MPI_Ssend(buf_dev, size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
         //MPI_Recv(buf_host, size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         //MPI_Send(buf_host, size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
         printf("-------->     r1_1\n");
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    free(buf_host);
-	cudaFree(buf_dev);
+    if (rank == 0) {std::cout << buf_host[0] << std::endl;}
     
-    printf("done\n");
+    //free(buf_host);
+	//cudaFree(buf_dev);
+    
+    std::cout << "rank " << rank << " done" << std::endl;
+    
     MPI_Finalize();
 }
 
