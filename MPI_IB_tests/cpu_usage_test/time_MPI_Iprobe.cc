@@ -64,21 +64,42 @@ long work_rank_0()
     req.tv_nsec = 0;
 
 
-    int flag = false;
     //std::cout <<"entering the main loop" << std::endl;
 
-    int iter = 1; 
+    int iter = 100; 
     
     struct timespec t_0, t_1, elapsed;  
     clock_gettime(CLOCK_MONOTONIC, &t_0);
     //double t1 = MPI_Wtime();
+
+
+
+    int count;
+    int flag = 0;
     for (int i = 0; i < iter; i++)
     {
         // what you want to measure here
         
-        //MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+        MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+        std::this_thread::sleep_for(std::chrono::nanoseconds(0));
         //nanosleep(&req, &rem);
+
+        //std::cout << "hi" << std::endl;
+        //count = 0; flag = 0;
+        //while (not flag)
+        //{
+        //    count++;
+        //    if (count==100) {flag=1;}
+        //    //std::this_thread::sleep_for(std::chrono::microseconds(1));
+        //}
+        //count = 0; flag = 0;
+        //while (true)
+        //{
+        //    count++;
+        //    if (count==100) {flag=1;}
+        //    if (flag) {break;}
+        //    //std::this_thread::sleep_for(std::chrono::microseconds(1));
+        //}
 
     }
     //double t2 = MPI_Wtime();
@@ -236,7 +257,7 @@ int main()
 
 
 
-    for (int i = 0; i < 1000000; i++)
+    for (int i = 0; i < 10000; i++)
     {
         if (rank == 0) {
             long time_ns = work_rank_0();
