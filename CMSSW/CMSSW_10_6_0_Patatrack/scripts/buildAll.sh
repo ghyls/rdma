@@ -197,8 +197,6 @@ LIBS="-libverbs" \
   --with-cuda=$CUDA_BASE \
   --without-rocm \
   --with-gdrcopy=$GDRCOPY_BASE \
-  --with-verbs=$RDMA_CORE_BASE \
-  --with-mlx5-dv \
   --with-rc \
   --with-ud \
   --with-dc \
@@ -208,7 +206,10 @@ LIBS="-libverbs" \
   --with-rdmacm=$RDMA_CORE_BASE \
   --with-knem=$KNEM_BASE \
   --with-xpmem=$XPMEM_BASE \
-  --without-ugni
+  --without-ugni \
+  --without-verbs
+  #--with-verbs=$RDMA_CORE_BASE \
+  #--with-mlx5-dv \
 
 make -j3
 make install
