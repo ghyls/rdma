@@ -105,8 +105,8 @@ plt.locator_params(axis='x', nbins=11)
 
 
 #Do you want to save the fig?
-plt.savefig('a0.png', transparent=False)
-plt.savefig('2d0_2.pdf', transparent=True)
+plt.savefig('a0.png', transparent=False, bbox_inches = 'tight')
+plt.savefig('2d0_2.pdf', transparent=True, bbox_inches = 'tight')
 
 #show the fig, enabling clicking option
 #ax1.clabel(cont, inline = 1, manual=True, colors='w', fmt="%0.3f")
