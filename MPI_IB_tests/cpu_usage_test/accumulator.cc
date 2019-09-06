@@ -31,7 +31,6 @@ int main()
 
     MPI_Get_count(&status, MPI_DOUBLE, &len);
 
-
     std::cout << "main2: Allocating those doubles: " << len << std::endl;
     // The array to be summed will be stored here on the GPU
     double *buf_d;
