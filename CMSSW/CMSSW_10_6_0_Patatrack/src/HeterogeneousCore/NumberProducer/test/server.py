@@ -2,9 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 
 process = cms.Process("TEST")
-
 process.MPIService  = cms.Service("MPIService")
-#process.Tracer = cms.Service("Tracer")
+
 
 
 # All the objects in the chain 
@@ -14,8 +13,9 @@ process.source = cms.Source("EmptySource")
 
 # We only load the accumulator here
 process.load('HeterogeneousCore.NumberProducer.numberAccS_cfi')
-process.numberAccS.baseTag = 42
 
+# This tag should match the one in the client
+process.numberAccS.baseTag = 42
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
