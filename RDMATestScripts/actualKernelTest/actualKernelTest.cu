@@ -11,7 +11,7 @@
 
     Runtime:
 
-        mpirun -np 2 --hostfile hosts -x UCX_MEMTYPEACHE=n -x UCX_TLS=all \
+        mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n -x UCX_TLS=all \
                      --mca pml ucx --mca btl ^openib main
 
         where "hosts" is a file containing, for example,
