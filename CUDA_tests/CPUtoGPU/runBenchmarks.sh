@@ -1,7 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+
+
 
 #nvcc -I/home/mariog/openmpi-4.0.1/build/include -L/home/mariog/openmpi-4.0.1/build/lib -lmpi bufferSendingBenchmarks.cu -o main
 scp -r *  mariog@felk40.cern.ch:/home/mariog/CUDA_tests/CPUtoGPU
-#rm ./benchmarksResults/$RUN/*
+rm -rf ./benchmarksResults/*
 
 #COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl ^openib main"
 #COMMAND="mpirun -np 2 --hostfile hosts --mca btl_openib_allow_ib 1 -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl openib main"
@@ -33,10 +37,21 @@ function ctrl_c() {
         echo "** Trapped CTRL-C"
 }
 
-for RUN in {0..9}
+for RUN in {0..4}
 do
+
+    mkdir -p ./benchmarksResults/$RUN
+    mkdir -p ./benchmarksResults/$RUN/UCX_transports/
     
     echo $RUN
+
+#    echo "PML UCX; BTL openIB ----------------------------------------------------"
+#    #COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx main"
+#    COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl openib,self --mca btl_openib_allow_ib 1 main"
+#    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/ucx_openIB_110.dat
+#    $COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/ucx_openIB_101.dat
+#    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/ucx_none_001.dat
+#
     echo "PML UCX; BTL ( ) ----------------------------------------------------"
     #COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx main"
     COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca pml ucx --mca btl ^openib main"
@@ -64,24 +79,29 @@ do
     #$COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/ob1_noOpenIB_101.dat
     #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/ob1_noOpenIB_001.dat
     
-    echo "PML ob1; BTL openIB ----------------------------------------------------"
-    COMMAND="mpirun -np 2 --hostfile hosts --mca pml ob1 --mca btl openib,self --mca btl_openib_allow_ib 1 main"
-    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/ob1_openIB_110.dat
-    #$COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/ob1_openIB_101.dat
-    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/ob1_openIB_001.dat
-    
-    #echo "PML ob1; BTL tcp ----------------------------------------------------"
-    #COMMAND="mpirun -np 2 --hostfile hosts --mca pml ob1 --mca btl tcp,self --mca btl_openib_allow_ib 1 main"
-    #$COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/ob1_tcp_110.dat
-    #$COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/ob1_tcp_101.dat
-    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/ob1_tcp_001.dat
-    
-    echo "PML none; BTL none ----------------------------------------------------"
-    COMMAND="mpirun -np 2 --hostfile hosts --mca btl_openib_allow_ib 1 main"
-    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/none_none_110.dat
-    #$COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/none_none_101.dat
-    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/none_none_001.dat
-    
+#    echo "PML ob1; BTL openIB ----------------------------------------------------"
+#    COMMAND="mpirun -np 2 --hostfile hosts --mca pml ob1 --mca btl openib,self --mca btl_openib_allow_ib 1 main"
+#    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/ob1_openIB_110.dat
+#    #$COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/ob1_openIB_101.dat
+#    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/ob1_openIB_001.dat
+#    
+#    echo "PML ob1; BTL tcp ----------------------------------------------------"
+#    COMMAND="mpirun -np 2 --hostfile hosts --mca pml ob1 --mca btl tcp,self --mca btl_openib_allow_ib 1 main"
+#    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/ob1_tcp_110.dat
+#    #$COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/ob1_tcp_101.dat
+#    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/ob1_tcp_001.dat
+#    
+#    echo "PML none; BTL no_openib ----------------------------------------------------"
+#    COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca btl ^openib main"
+#    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/none_noOpenIB_110.dat
+#    $COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/none_noOpenIB_101.dat
+#    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/none_noOpenIB_001.dat
+
+#    echo "PML none; BTL openib ----------------------------------------------------"
+#    COMMAND="mpirun -np 2 --hostfile hosts -x UCX_MEMTYPE_CACHE=n --mca btl ^openib main"
+#    $COMMAND 1 1 0 0 > ./benchmarksResults/$RUN/none_OpenIB_110.dat
+#    $COMMAND 1 0 1 0 > ./benchmarksResults/$RUN/none_OpenIB_101.dat
+#    #$COMMAND 0 0 1 0 > ./benchmarksResults/$RUN/none_noOpenIB_001.dat
     
     
     ###echo "UCX transports ========================================================"
