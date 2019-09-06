@@ -1,14 +1,16 @@
+/*
+
+    This file defines a simple kernel that sums all the elements of a given
+    memory buffer.
+
+*/ 
+
+
+
 #include <cuda.h>
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include <iostream>
 #include "header.h"
-
-
-
-
-
-
-
 
 
 
@@ -29,7 +31,6 @@ void AccumulatorGPU(double* buf_d, double* sum_d, int len)
 void cudaWrapper(double* buf_d, double* sum_d, int len)
 {
     
-    //AccumulatorGPU<<<1, 1>>>(sum_d);
     cudaCheck( cudaDeviceSynchronize()); // wait for everyone
     LOG("[cudaWrapper::cudaWrapper]:  calling the kernel", 1);
     AccumulatorGPU<<<1, 1>>>(buf_d, sum_d, len);

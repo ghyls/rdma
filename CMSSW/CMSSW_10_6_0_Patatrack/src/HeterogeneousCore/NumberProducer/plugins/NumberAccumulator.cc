@@ -1,7 +1,17 @@
+/*
+
+    This Accumulator is meant to be run on the client, in the case in which all
+    the modules are run in serial (without using MPI). It does the same as the
+    remote version NumberAccS.
+
+*/
+
+
 // system include files
 #include <memory>
 #include <iostream>
-//#include <mpi.h>
+#include "header.h"
+
 
 // user include files
 #include "FWCore/Framework/interface/Event.h"
@@ -14,7 +24,6 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 
-extern void LOG(std::string message, int t);
 
 // class declaration
 
@@ -37,14 +46,13 @@ NumberAccumulator::NumberAccumulator(const edm::ParameterSet& config) :
     data_(consumes<std::vector<double>>(config.getParameter<edm::InputTag>("data")))
 {
    LOG("[NumberAccumulator::NumberAccumulator]:  Constructor called", 2);
-   produces<std::vector<double>>(); // only consisting on one element!
+   produces<std::vector<double>>();
 }
 
 
 void
 NumberAccumulator::produce(edm::Event& event, const edm::EventSetup& setup)
 {
-    
     // read from the NumberProducer
     edm::Handle<std::vector<double>> handle;
     event.getByToken(data_, handle);
@@ -65,8 +73,7 @@ NumberAccumulator::produce(edm::Event& event, const edm::EventSetup& setup)
 }
 
 void
-NumberAccumulator::beginStream(edm::StreamID)
-{
+NumberAccumulator::beginStream(edm::StreamID){
 }
 
 void

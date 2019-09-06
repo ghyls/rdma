@@ -1,3 +1,15 @@
+/*
+
+    This file reads the output of the accumulator and outputs the result (each
+    element of the std::vector that the accumulator has put on the event) on the
+    terminal.
+
+    It also defines the "LOG" function, that simplifies debugging classifying
+    the logs in colors and allowing to show only a specific tyoe of them (e.g.
+    do not show debug logs).
+
+*/
+
 // system include files
 #include <iostream>
 #include <vector>

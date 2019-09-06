@@ -1,3 +1,12 @@
+/*
+
+    This script produces a vector of doubles
+
+*/
+
+
+
+
 // system include files
 #include <memory>
 #include <iostream>
@@ -41,8 +50,6 @@ NumberProducer::NumberProducer(const edm::ParameterSet& config) :
     //register your products
     produces<std::vector<double>>();
     LOG("[NumberProducer::NumberProducer]:  Constructor called", 1);
-
-    //now do what ever other initialization is needed
 }
 
 
@@ -65,8 +72,7 @@ NumberProducer::produce(edm::Event& event, const edm::EventSetup& setup)
 }
 
 void
-NumberProducer::beginStream(edm::StreamID)
-{
+NumberProducer::beginStream(edm::StreamID){
 }
 
 void

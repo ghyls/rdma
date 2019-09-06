@@ -1,3 +1,16 @@
+/*
+
+This script runs on the server. It receives the data from the client and runs
+with it a simple kernel (defined in cudaWrapper.cu). Then it sends the result
+back to the NumberOffloader (which runs on the client)
+
+It can receive the result directly on the GPU, follow the path H → H → D or just
+receive the package on the host and compute the result there (see the flags in
+the code).
+
+*/
+
+
 // system include files
 #include <memory>
 #include <iostream>
@@ -19,7 +32,6 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 
-extern void LOG(std::string message, int t);
 
 // class declaration
 
@@ -63,7 +75,6 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
     LOG("[NumberOffloader::produce]:  RANK: " + std::to_string(rank) + 
                                         "; SIZE: " + std::to_string(size), 1);
 
-    // Only rank 1 is supposed to be here
 
     int len; // length of the data package
 
@@ -84,7 +95,7 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
         LOG("[NumberAccS::produce]:  H -> H -> D.", 0);   
 
         input = (double*)malloc(len * sizeof(double));   // host buffer
-        // Recv the actual buffer
+
         MPI_Recv(&input[0], len, MPI_DOUBLE, 0, baseTag_ + 98, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         LOG("[NumberAccS::produce]:  data Received", 1);   
     }
@@ -123,9 +134,7 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
         if (GPUDirect)
         {
             LOG("[NumberAccS::produce]:  Sending the result (DtoH)", 1);
-            //std::this_thread::sleep_for(std::chrono::seconds(10));
             MPI_Ssend(sum_d, 1, MPI_DOUBLE, 0, baseTag_ + 101, MPI_COMM_WORLD);
-            
             LOG("[NumberAccS::produce]:  result Sent (DtoH)", 1);
         }
         else
@@ -137,13 +146,9 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
             MPI_Ssend(sum_h, 1, MPI_DOUBLE, 0, baseTag_ + 101, MPI_COMM_WORLD);
             LOG("[NumberAccS::produce]:  result Sent (HtoH)", 1);
         }
-        
 
         cudaFree(buf_d);
         cudaFree(sum_d);
-        // get back the result from the GPU
-
-
     }
     else
     {
@@ -161,8 +166,7 @@ NumberAccS::produce(edm::Event& event, const edm::EventSetup& setup)
 }
 
 void
-NumberAccS::beginStream(edm::StreamID)
-{
+NumberAccS::beginStream(edm::StreamID){
 }
 
 void

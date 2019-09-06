@@ -61,7 +61,7 @@ NumberOffloader::acquire(edm::Event const& event, edm::EventSetup const& setup, 
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     LOG("[NumberOffloader::acquire]:  RANK: " + std::to_string(rank) + 
-                                        "; SIZE: " + std::to_string(size), 1);
+                                        "; SIZE: " + std::to_string(size), 1); 
 
     // read from the NumberProducer
     edm::Handle<std::vector<double>> handle;
@@ -90,8 +90,8 @@ NumberOffloader::acquire(edm::Event const& event, edm::EventSetup const& setup, 
     int flag = false;
     while (not flag)
     {
-        MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
         std::this_thread::sleep_for(std::chrono::microseconds(1));
+        MPI_Iprobe(1, baseTag_ + 101, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
     }
     
     LOG("[NumberOffloader::acquire]:  main thread finished", 1);
