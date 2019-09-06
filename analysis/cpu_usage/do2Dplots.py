@@ -28,7 +28,7 @@ y = data[0][1:] / 1000                                 # first row, time, micros
 for elem in data[1:,1:]:
     for i in range(len(elem)):
         elem[i] *= mult
-        #if elem[i] > 20: elem[i] = 0 # <- DELETEME
+        if elem[i] > 2: elem[i] = 0 # <- DELETEME
     z.append(elem) 
 z = np.transpose(z)
 # At this point we already have x, y and z.
