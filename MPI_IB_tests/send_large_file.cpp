@@ -1,8 +1,15 @@
+/*
+
+    This runs MPI benchmarks over MPI. If we have nodes A and B, it measures the
+    time taken to do A→B, B→A and A→B→A
+
+*/
+
+
+
 #include <iostream>
 #include "mpi.h"
 
-//  A   ->  Felk (master)
-//  B   ->  Patatrack
 
 int main(int argc, char* argv[])
 {
@@ -30,8 +37,7 @@ int main(int argc, char* argv[])
         std::cout << "#size (MB)" << "\ttime Send AB (s)" << "\ttime BA (s)"
                                         << "\ttime A->B->A (s)" << std::endl;
     
-    for (int numberOfInts = 25000000; numberOfInts < 250000000; numberOfInts += 2250000)
-    //for (int i = 0; i < 100; i++)
+    for (int numberOfInts = 2; numberOfInts < 250000000; numberOfInts *= 1.5)
     {
         //int numberOfInts = 50000;
         //int* buff = new int[numberOfInts];
