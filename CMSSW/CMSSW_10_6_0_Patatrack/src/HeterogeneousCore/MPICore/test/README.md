@@ -69,3 +69,8 @@ Sample output:
     rank 1: Calling MPI
     rank 1: done
 
+## NumberProducer
+
+This is the CMSSW plugin performing RDMA to a remote GPU.
+
+
